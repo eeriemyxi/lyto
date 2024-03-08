@@ -139,8 +139,9 @@ def on_service_state_change(
         if service_type == "_adb-tls-pairing._tcp.local.":
             if not device_ports:
                 return
-            pair_device(info.parsed_addresses()[0], info.port or 5555, PASSWORD)
-            connect_device(info.parsed_addresses()[0], device_ports[0])
+            addr = info.parsed_addresses()[0]
+            pair_device(addr, info.port or 5555, PASSWORD)
+            connect_device(addr, device_ports[0])
         elif service_type == "_adb-tls-connect._tcp.local.":
             device_ports.append(info.port)
 
