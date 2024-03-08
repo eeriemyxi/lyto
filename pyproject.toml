@@ -1,0 +1,32 @@
+[project]
+name = "lyto"
+version = "0.1.0"
+description = "Automatic wireless ADB connection using QR codes."
+authors = [
+    { name = "myxi", email = "myxi@envs.net" }
+]
+dependencies = [
+    "zeroconf>=0.131.0",
+    "rich>=13.7.1",
+    "sixel @ git+https://github.com/lubosz/python-sixel.git",
+    "qrcode[pil]>=7.4.2",
+]
+readme = "README.md"
+requires-python = ">= 3.8"
+
+[project.scripts]
+lyto = "lyto.__main__:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.rye]
+managed = true
+dev-dependencies = []
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lyto"]
