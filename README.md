@@ -6,6 +6,8 @@ Automatic wireless ADB connection using QR codes.
 ### Note
 Minimum Android version: 11
 
+Your terminal must support [Sixel](https://en.wikipedia.org/wiki/Sixel) graphics. Non-sixel QR code support is in the TODO list.
+
 ## Installation
 #### First Method
 ```
