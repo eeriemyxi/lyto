@@ -52,7 +52,7 @@ QR_BORDER = args.qr_border
 
 logging.basicConfig(
     level=logging.DEBUG if args.debug else logging.INFO,
-1   format="%(message)s",
+    format="%(message)s",
     datefmt="[%X]",
     handlers=[RichHandler(markup=True)],
 )
@@ -77,7 +77,7 @@ def ascii_qr_code(text: str):
     img.save(file)
 
     # TODO: support for terminals without sixel
-    writer = sixel.converter.SixelConverter(file, alpha_threshold=2)
+    writer = sixel.converter.SixelConverter(file, alpha_threshold=5)
 
     return writer.getvalue()
 
