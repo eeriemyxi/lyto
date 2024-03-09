@@ -25,7 +25,7 @@ pip install git+<REPO URL>@main
 usage: __main__.py [-h] [--adb-path ADB_PATH] [--tcpip-port TCPIP_PORT]
                    [--use-port USE_PORT] [--qr-scale QR_SCALE]
                    [--qr-border QR_BORDER] [--debug] [--as-sixel]
-                   [--only-connect] [--do-tcpip] [--connect-tcpip]
+                   [--only-connect] [--do-tcpip] [--connect-tcpip] [-V]
 
 options:
   -h, --help            show this help message and exit
@@ -44,6 +44,7 @@ options:
   --do-tcpip            After connecting do `adb tcpip` on specified port.
   --connect-tcpip       Detects device IP on startup and tries to connect to it
                         with TCPIP_PORT as the port.
+  -V, --version         Show package version.
 ```
 
 ## License
