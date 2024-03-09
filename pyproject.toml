@@ -1,6 +1,6 @@
 [project]
 name = "lyto"
-version = "0.2.1"
+version = "0.2.2"
 description = "Automatic wireless ADB connection using QR codes."
 authors = [
     { name = "myxi", email = "myxi@envs.net" }
