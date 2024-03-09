@@ -5,6 +5,7 @@ import random
 import string
 import subprocess
 import time
+import importlib.metadata
 from os import _exit, get_terminal_size
 
 import qrcode
@@ -78,8 +79,13 @@ parser.add_argument(
     action="store_true",
     help="Detects device IP on startup and tries to connect to it with TCPIP_PORT as the port.",
 )
+parser.add_argument(
+    "-V", "--version",
+    action="version",
+    version=importlib.metadata.version("lyto"),
+    help="Show package version.",
+)
 cli_args = parser.parse_args()
-
 ADB_PATH   = cli_args.adb_path
 QR_SCALE   = cli_args.qr_scale
 QR_BORDER  = cli_args.qr_border
