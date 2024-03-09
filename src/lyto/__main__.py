@@ -215,6 +215,7 @@ def on_service_state_change(
 
 def main() -> int:
     # TODO: align it to the center
+    print("\033[?1049h", end='')
     print(ascii_qr_code(generate_code(NAME, PASSWORD)))
 
     zc = Zeroconf(ip_version=IPVersion.V4Only)
@@ -231,6 +232,7 @@ def main() -> int:
     except KeyboardInterrupt:
         pass
     finally:
+        print("\033[?1049l", end='')
         zc.close()
         return 0
 
