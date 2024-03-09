@@ -6,7 +6,8 @@ import string
 import subprocess
 import time
 import importlib.metadata
-from os import _exit, get_terminal_size
+import _thread
+from os import get_terminal_size
 
 import qrcode
 import sixel
@@ -147,7 +148,7 @@ def _debug_info_pc(out: subprocess.CompletedProcess):
 
 def forceful_exit():
     log.info("[italic yellow]Exiting...[/]")
-    _exit(0)
+    _thread.interrupt_main()
 
 
 def pair_device(address: str, port: int, password: str):
