@@ -5,7 +5,7 @@ import random
 import string
 import subprocess
 import time
-from os import _exit
+from os import _exit, get_terminal_size
 
 import qrcode
 import sixel
@@ -49,7 +49,7 @@ parser.add_argument(
     "--qr-scale",
     default=QR_SCALE,
     type=int,
-    help=f"QR code image scale. Defaults to {repr(QR_SCALE)}.",
+    help=f"(SIXEL ONLY) QR code image scale. Defaults to {repr(QR_SCALE)}.",
 )
 parser.add_argument(
     "--qr-border",
@@ -58,6 +58,11 @@ parser.add_argument(
     help=f"QR code border size. Defaults to {repr(QR_BORDER)}.",
 )
 parser.add_argument("--debug", action="store_true", help="Enable debug logs.")
+parser.add_argument(
+    "--as-sixel",
+    action="store_true",
+    help="(EXPERIMENTAL) Use Sixel graphics.",
+)
 parser.add_argument(
     "--only-connect",
     action="store_true",
@@ -100,18 +105,34 @@ def generate_code(name: str, password: str):
 
 
 def ascii_qr_code(text: str):
-    file = io.BytesIO()
-
     qr = qrcode.QRCode(border=QR_BORDER, box_size=QR_SCALE, version=1)
     qr.add_data(text)
-    img = qr.make_image(back_color="white", fill_color="black")
-    img.save(file)
 
-    # TODO: support for terminals without sixel
-    writer = sixel.converter.SixelConverter(file, chromakey=True)
+    if cli_args.as_sixel:
+        log.debug("Outputting QR code as Sixel graphics")
+        file = io.BytesIO()
 
-    return writer.getvalue()
+        img = qr.make_image(back_color="white", fill_color="black")
+        img.save(file)
 
+        writer = sixel.converter.SixelConverter(file, chromakey=True)
+
+        return writer.getvalue()
+
+    file = io.StringIO()
+    qr.print_ascii(invert=True, out=file)
+    file.seek(0)
+    x, y = get_terminal_size()
+    pos = line_c = 0
+
+    for line in file.readlines():
+        file.seek(pos)
+        file.write((x - len(line)) // 2 * " " + line)
+        pos = file.tell()
+        line_c += 1
+
+    file.seek(0)
+    return (y - line_c) // 2 * "\n" + file.read()
 
 def _debug_info_pc(out: subprocess.CompletedProcess):
     log.debug(f"{out.stderr=}")
@@ -214,7 +235,6 @@ def on_service_state_change(
 
 
 def main() -> int:
-    # TODO: align it to the center
     print("\033[?1049h", end='')
     print(ascii_qr_code(generate_code(NAME, PASSWORD)))
 
