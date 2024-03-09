@@ -17,19 +17,33 @@ def get_code(n: int):
     return "".join(random.choices(string.ascii_letters, k=n))
 
 
-SIZE      = 5
-NAME      = "ADB_WIFI_" + get_code(SIZE)
-PASSWORD  = get_code(SIZE)
-TYPES     = ["_adb-tls-connect._tcp.local.", "_adb-tls-pairing._tcp.local."]
-ADB_PATH  = "adb"
-QR_SCALE  = 10
-QR_BORDER = 1
+SIZE       = 5
+NAME       = "ADB_WIFI_" + get_code(SIZE)
+PASSWORD   = get_code(SIZE)
+TYPES      = ["_adb-tls-connect._tcp.local.", "_adb-tls-pairing._tcp.local."]
+ADB_PATH   = "adb"
+QR_SCALE   = 10
+QR_BORDER  = 1
+TCPIP_PORT = 5555
+USE_PORT   = 0
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
     "--adb-path",
     default=ADB_PATH,
     help=f"Path to `adb` platform-tool. Defaults to {repr(ADB_PATH)}.",
+)
+parser.add_argument(
+    "--tcpip-port",
+    default=TCPIP_PORT,
+    type=int,
+    help=f"Port for doing `adb tcpip`. See `--do-tcpip` flag. Defaults to {repr(TCPIP_PORT)}.",
+)
+parser.add_argument(
+    "--use-port",
+    default=USE_PORT,
+    type=int,
+    help=f"Specify port for doing `adb pair` and `adb connect` instead of auto-detecting it. Defaults to {repr(USE_PORT)}.",
 )
 parser.add_argument(
     "--qr-scale",
@@ -44,14 +58,31 @@ parser.add_argument(
     help=f"QR code border size. Defaults to {repr(QR_BORDER)}.",
 )
 parser.add_argument("--debug", action="store_true", help="Enable debug logs.")
-args = parser.parse_args()
+parser.add_argument(
+    "--only-connect",
+    action="store_true",
+    help="Only connect to the device, don't pair.",
+)
+parser.add_argument(
+    "--do-tcpip",
+    action="store_true",
+    help="After connecting do `adb tcpip` on specified port.",
+)
+parser.add_argument(
+    "--connect-tcpip",
+    action="store_true",
+    help="Detects device IP on startup and tries to connect to it with TCPIP_PORT as the port.",
+)
+cli_args = parser.parse_args()
 
-ADB_PATH  = args.adb_path
-QR_SCALE  = args.qr_scale
-QR_BORDER = args.qr_border
+ADB_PATH   = cli_args.adb_path
+QR_SCALE   = cli_args.qr_scale
+QR_BORDER  = cli_args.qr_border
+USE_PORT   = cli_args.use_port
+TCPIP_PORT = cli_args.tcpip_port
 
 logging.basicConfig(
-    level=logging.DEBUG if args.debug else logging.INFO,
+    level=logging.DEBUG if cli_args.debug else logging.INFO,
     format="%(message)s",
     datefmt="[%X]",
     handlers=[RichHandler(markup=True)],
@@ -87,6 +118,11 @@ def _debug_info_pc(out: subprocess.CompletedProcess):
     log.debug(f"{out.stdout=}")
 
 
+def forceful_exit():
+    log.info("[italic yellow]Exiting...[/]")
+    _exit(0)
+
+
 def pair_device(address: str, port: int, password: str):
     log.info("[italic yellow]Pairing...[/]")
     args = [ADB_PATH, "pair", f"{address}:{port}", password]
@@ -113,9 +149,23 @@ def connect_device(address: str, port: int):
         return
 
     log.info("[bold green]Connected[/].")
-    log.info("[italic yellow]Exiting...[/]")
+    if not cli_args.do_tcpip:
+        forceful_exit()
 
-    _exit(0)
+
+def tcpip_device(port: int):
+    log.info(f"[italic yellow]Activating TCP IP on port {port}...[/]")
+    args = [ADB_PATH, "tcpip", f"{port}"]
+    log.debug("Args for tcpip command: %s", args)
+    out = subprocess.run(args, capture_output=True)
+
+    if out.returncode != 0:
+        log.critical("[red bold]TCP IP activation failed.[/]")
+        _debug_info_pc(out)
+        return
+
+    log.info("[bold green]Activated[/].")
+    forceful_exit()
 
 
 def on_service_state_change(
@@ -136,13 +186,30 @@ def on_service_state_change(
         log.debug(f"{info.port=}")
         log.debug(f"{info.parsed_addresses()=}")
 
+        addr = info.parsed_addresses()[0]
+
         if service_type == "_adb-tls-pairing._tcp.local.":
             if not device_ports:
                 return
-            addr = info.parsed_addresses()[0]
-            pair_device(addr, info.port or 5555, PASSWORD)
-            connect_device(addr, device_ports[0])
+
+            if cli_args.use_port == 0:
+                pair_port = info.port or 5555
+                connect_port = device_ports[0]
+            else:
+                pair_port = connect_port = cli_args.use_port
+
+            if not cli_args.only_connect:
+                pair_device(addr, pair_port, PASSWORD)
+
+            connect_device(addr, connect_port)
+
+            if cli_args.do_tcpip:
+                tcpip_device(TCPIP_PORT)
         elif service_type == "_adb-tls-connect._tcp.local.":
+            if cli_args.connect_tcpip:
+                connect_device(addr, TCPIP_PORT)
+                tcpip_device(TCPIP_PORT)
+
             device_ports.append(info.port)
 
 
