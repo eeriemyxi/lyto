@@ -77,7 +77,7 @@ def ascii_qr_code(text: str):
     img.save(file)
 
     # TODO: support for terminals without sixel
-    writer = sixel.converter.SixelConverter(file, alpha_threshold=5)
+    writer = sixel.converter.SixelConverter(file, chromakey=True)
 
     return writer.getvalue()
 
