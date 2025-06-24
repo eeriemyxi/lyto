@@ -3,26 +3,24 @@ Automatic wireless ADB connection using QR codes.
 
 ![](https://i.imgur.com/CWVahuZ.png)
 
-### Note
-Minimum Android version: 11
-
-~~Your terminal must support [Sixel](https://en.wikipedia.org/wiki/Sixel) graphics. Non-sixel QR code support is in the TODO list.~~
-Now it defaults to non-sixel QR code. See `--as-sixel` flag.
+> [!NOTE]
+> Minimum Android version: 11
 
 ## Installation
 #### First Method
 ```
-git clone --depth 1 --branch main <REPO URL> lyto
-pip install ./lyto
+pip install git+https://github.com/eeriemyxi/lyto@main
 ```
+
 #### Second Method
 ```
-pip install git+<REPO URL>@main
+git clone --depth 1 --branch main https://github.com/eeriemyxi/lyto
+pip install ./lyto
 ```
 
 ## Command-line Arguments
 ```
-usage: __main__.py [-h] [--adb-path ADB_PATH] [--tcpip-port TCPIP_PORT]
+usage: lyto [-h] [--adb-path ADB_PATH] [--tcpip-port TCPIP_PORT]
                    [--use-port USE_PORT] [--qr-scale QR_SCALE]
                    [--qr-border QR_BORDER] [--debug] [--as-sixel]
                    [--only-connect] [--do-tcpip] [--connect-tcpip] [-V]
@@ -49,7 +47,3 @@ options:
 
 ## License
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
-
-* * *
-
-Feel free to enhance Lyto according to your needs and contribute back to the project! If you encounter any issues or have suggestions for improvement, please open an issue on the repository. Thank you for using Lyto!
