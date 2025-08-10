@@ -20,9 +20,6 @@ if sys.platform.startswith('win'):
          file.write('# fake termios here')
     print("Now importing sixel")
     import sixel
-
-print(f"Python executable path: {python_executable_path}")   
-print(f"Python installation directory: {python_installation_directory}")
 else:
     import sixel
 from rich.logging import RichHandler
