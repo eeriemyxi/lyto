@@ -132,6 +132,9 @@ def ascii_qr_code(text: str):
     qr.add_data(text)
 
     if cli_args.as_sixel:
+        if os.name == "nt":
+            log.debug("Using windows, cant use sixel.")
+            return 0
         log.debug("Outputting QR code as Sixel graphics")
         file = io.BytesIO()
 
