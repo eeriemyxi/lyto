@@ -277,9 +277,6 @@ def main() -> int:
         while True:
             time.sleep(0.1)
     except KeyboardInterrupt:
-        if sys.platform.startswith('win'):
-            print("Deleting created fake termios")
-            os.remove(pyinstall + "\\termios.py")
         pass
     finally:
         if sys.platform.startswith('win'):
@@ -289,5 +286,5 @@ def main() -> int:
         zc.close()
         if sys.platform.startswith('win'):
             print("Deleting created fake termios")
-            os.remove(pyinstall + "\termios.py")
+            os.remove(pyinstall + "\\termios.py")
         return 0
