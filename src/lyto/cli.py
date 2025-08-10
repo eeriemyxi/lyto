@@ -130,17 +130,17 @@ def ascii_qr_code(text: str):
 
     if cli_args.as_sixel:
         if os.name == "nt":
-        log.debug("Using windows, cant use sixel.")
-    else:
-        log.debug("Outputting QR code as Sixel graphics")
-        file = io.BytesIO()
+           log.debug("Using windows, cant use sixel.")
+        else:
+            log.debug("Outputting QR code as Sixel graphics")
+            file = io.BytesIO()
 
-        img = qr.make_image(back_color="white", fill_color="black")
-        img.save(file)
+            img = qr.make_image(back_color="white", fill_color="black")
+            img.save(file)
 
-        writer = sixel.converter.SixelConverter(file, chromakey=True)
+            writer = sixel.converter.SixelConverter(file, chromakey=True)
 
-        return writer.getvalue()
+            return writer.getvalue()
 
     file = io.StringIO()
     qr.print_ascii(invert=True, out=file)
