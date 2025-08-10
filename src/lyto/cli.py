@@ -8,9 +8,23 @@ import time
 import importlib.metadata
 import _thread
 from os import get_terminal_size
+import os
 
 import qrcode
-import sixel
+import sys
+
+if sys.platform.startswith('win'):
+    print("Running in windows, creating fake termios")
+    pyinstall = os.path.dirname(sys.executable)
+    with open(f'{pyinstall}\termios.py', 'w') as file:
+         file.write('# fake termios here')
+    print("Now importing sixel")
+    import sixel
+
+print(f"Python executable path: {python_executable_path}")   
+print(f"Python installation directory: {python_installation_directory}")
+else:
+    import sixel
 from rich.logging import RichHandler
 from zeroconf import IPVersion, ServiceBrowser, ServiceStateChange, Zeroconf
 
@@ -245,7 +259,10 @@ def on_service_state_change(
 
 
 def main() -> int:
-    print("\033[?1049h", end="")
+    if sys.platform.startswith('win'):
+        print()
+    else:
+        print("\033[?1049h", end="")
     print(ascii_qr_code(generate_code(NAME, PASSWORD)))
 
     zc = Zeroconf(ip_version=IPVersion.V4Only)
@@ -260,8 +277,17 @@ def main() -> int:
         while True:
             time.sleep(0.1)
     except KeyboardInterrupt:
+        if sys.platform.startswith('win'):
+            print("Deleting created fake termios")
+            os.remove(pyinstall + "\termios.py")
         pass
     finally:
-        print("\033[?1049l", end="")
+        if sys.platform.startswith('win'):
+            print()
+        else:
+            print("\033[?1049l", end="")
         zc.close()
+        if sys.platform.startswith('win'):
+            print("Deleting created fake termios")
+            os.remove(pyinstall + "\termios.py")
         return 0
