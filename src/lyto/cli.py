@@ -130,8 +130,8 @@ def ascii_qr_code(text: str):
 
     if cli_args.as_sixel:
         if os.name == "nt":
-            log.debug("Using windows, cant use sixel.")
-            return 0
+        log.debug("Using windows, cant use sixel.")
+    else:
         log.debug("Outputting QR code as Sixel graphics")
         file = io.BytesIO()
 
@@ -279,7 +279,7 @@ def main() -> int:
     except KeyboardInterrupt:
         if sys.platform.startswith('win'):
             print("Deleting created fake termios")
-            os.remove(pyinstall + "\termios.py")
+            os.remove(pyinstall + "\\termios.py")
         pass
     finally:
         if sys.platform.startswith('win'):
