@@ -16,7 +16,7 @@ import sys
 if sys.platform.startswith('win'):
     print("Running in windows, creating fake termios")
     pyinstall = os.path.dirname(sys.executable)
-    with open(f'{pyinstall}\termios.py', 'w') as file:
+    with open(f'{pyinstall}\\termios.py', 'w') as file:
          file.write('# fake termios here')
     print("Now importing sixel")
     import sixel
