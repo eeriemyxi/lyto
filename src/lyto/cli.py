@@ -12,16 +12,6 @@ import os
 
 import qrcode
 import sys
-
-if sys.platform.startswith('win'):
-    print("Running in windows, creating fake termios")
-    pyinstall = os.path.dirname(sys.executable)
-    with open(f'{pyinstall}\\termios.py', 'w') as file:
-         file.write('# fake termios here')
-    print("Now importing sixel")
-    import sixel
-else:
-    import sixel
 from rich.logging import RichHandler
 from zeroconf import IPVersion, ServiceBrowser, ServiceStateChange, Zeroconf
 
@@ -74,7 +64,7 @@ parser.add_argument("--debug", action="store_true", help="Enable debug logs.")
 parser.add_argument(
     "--as-sixel",
     action="store_true",
-    help="(EXPERIMENTAL) Use Sixel graphics.",
+    help="(EXPERIMENTAL) Use Sixel graphics. Currently not supported on Windows.",
 )
 parser.add_argument(
     "--only-connect",
@@ -132,6 +122,7 @@ def ascii_qr_code(text: str):
         if os.name == "nt":
            print("Using windows, cant use sixel.")
         else:
+            import sixel
             log.debug("Outputting QR code as Sixel graphics")
             file = io.BytesIO()
 
@@ -284,7 +275,4 @@ def main() -> int:
         else:
             print("\033[?1049l", end="")
         zc.close()
-        if sys.platform.startswith('win'):
-            print("Deleting created fake termios")
-            os.remove(pyinstall + "\\termios.py")
         return 0
