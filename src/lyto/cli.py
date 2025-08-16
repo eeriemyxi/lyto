@@ -132,7 +132,7 @@ def ascii_qr_code(text: str):
     if cli_args.as_sixel:
         if os.name == "nt":
             log.critical("[red bold]--as-sixel flag currently is not supported on Windows.[/]")
-            print("\033[?1049l", end="")
+            
             print("Making QR code without sixel graphics...")
         else:   
              import sixel
