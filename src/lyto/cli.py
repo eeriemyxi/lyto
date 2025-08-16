@@ -4,6 +4,7 @@ import logging
 import random
 import string
 import subprocess
+import sys
 import time
 import importlib.metadata
 import _thread
@@ -11,7 +12,6 @@ from os import get_terminal_size
 import os
 
 import qrcode
-import sys
 from rich.logging import RichHandler
 from zeroconf import IPVersion, ServiceBrowser, ServiceStateChange, Zeroconf
 
@@ -120,18 +120,20 @@ def ascii_qr_code(text: str):
 
     if cli_args.as_sixel:
         if os.name == "nt":
-           print("Using windows, cant use sixel.")
-        else:
-            import sixel
-            log.debug("Outputting QR code as Sixel graphics")
-            file = io.BytesIO()
+            log.critical("[red bold]--as-sixel flag currently is not supported on Windows.[/]")
+            print("\033[?1049l", end="")
+            forceful_exit()
+            
+        import sixel
+        log.debug("Outputting QR code as Sixel graphics")
+        file = io.BytesIO()
 
-            img = qr.make_image(back_color="white", fill_color="black")
-            img.save(file)
+        img = qr.make_image(back_color="white", fill_color="black")
+        img.save(file)
 
-            writer = sixel.converter.SixelConverter(file, chromakey=True)
+        writer = sixel.converter.SixelConverter(file, chromakey=True)
 
-            return writer.getvalue()
+        return writer.getvalue()
 
     file = io.StringIO()
     qr.print_ascii(invert=True, out=file)
@@ -250,10 +252,7 @@ def on_service_state_change(
 
 
 def main() -> int:
-    if sys.platform.startswith('win'):
-        print()
-    else:
-        print("\033[?1049h", end="")
+    print("\033[?1049h", end="")
     print(ascii_qr_code(generate_code(NAME, PASSWORD)))
 
     zc = Zeroconf(ip_version=IPVersion.V4Only)
@@ -270,9 +269,6 @@ def main() -> int:
     except KeyboardInterrupt:
         pass
     finally:
-        if sys.platform.startswith('win'):
-            print()
-        else:
-            print("\033[?1049l", end="")
+        print("\033[?1049l", end="")
         zc.close()
         return 0
