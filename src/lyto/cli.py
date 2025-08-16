@@ -15,6 +15,17 @@ import qrcode
 from rich.logging import RichHandler
 from zeroconf import IPVersion, ServiceBrowser, ServiceStateChange, Zeroconf
 
+import ctypes
+
+def enable_virtual_terminal():
+    kernel32 = ctypes.windll.kernel32
+    handle = kernel32.GetStdHandle(-11)  # STD_OUTPUT_HANDLE = -11
+    mode = ctypes.c_ulong()
+    kernel32.GetConsoleMode(handle, ctypes.byref(mode))
+    mode.value |= 0x0004  # ENABLE_VIRTUAL_TERMINAL_PROCESSING
+    kernel32.SetConsoleMode(handle, mode)
+
+enable_virtual_terminal() # Function to enable ASCII escape sequences
 
 def get_code(n: int):
     return "".join(random.choices(string.ascii_letters, k=n))
@@ -122,18 +133,18 @@ def ascii_qr_code(text: str):
         if os.name == "nt":
             log.critical("[red bold]--as-sixel flag currently is not supported on Windows.[/]")
             print("\033[?1049l", end="")
-            forceful_exit()
-            
-        import sixel
-        log.debug("Outputting QR code as Sixel graphics")
-        file = io.BytesIO()
+            print("Making QR code without sixel graphics...")
+        else:   
+             import sixel
+             log.debug("Outputting QR code as Sixel graphics")
+             file = io.BytesIO()
 
-        img = qr.make_image(back_color="white", fill_color="black")
-        img.save(file)
+             img = qr.make_image(back_color="white", fill_color="black")
+             img.save(file)
 
-        writer = sixel.converter.SixelConverter(file, chromakey=True)
+             writer = sixel.converter.SixelConverter(file, chromakey=True)
 
-        return writer.getvalue()
+             return writer.getvalue()
 
     file = io.StringIO()
     qr.print_ascii(invert=True, out=file)
