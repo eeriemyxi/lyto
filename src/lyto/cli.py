@@ -1,15 +1,15 @@
+import _thread
 import argparse
+import importlib.metadata
 import io
 import logging
+import os
 import random
 import string
 import subprocess
 import sys
 import time
-import importlib.metadata
-import _thread
 from os import get_terminal_size
-import os
 
 import qrcode
 from rich.logging import RichHandler
@@ -119,16 +119,17 @@ def ascii_qr_code(text: str):
     qr.add_data(text)
 
     if cli_args.as_sixel:
-         import sixel
-         log.debug("Outputting QR code as Sixel graphics")
-         file = io.BytesIO()
+        import sixel
 
-         img = qr.make_image(back_color="white", fill_color="black")
-         img.save(file)
+        log.debug("Outputting QR code as Sixel graphics")
+        file = io.BytesIO()
 
-         writer = sixel.converter.SixelConverter(file, chromakey=True)
+        img = qr.make_image(back_color="white", fill_color="black")
+        img.save(file)
 
-         return writer.getvalue()
+        writer = sixel.converter.SixelConverter(file, chromakey=True)
+
+        return writer.getvalue()
 
     file = io.StringIO()
     qr.print_ascii(invert=True, out=file)
@@ -248,7 +249,9 @@ def on_service_state_change(
 
 def main() -> int:
     if cli_args.as_sixel and os.name == "nt":
-        log.critical("[red bold]--as-sixel flag is currently not supported on Windows.[/]")
+        log.critical(
+            "[red bold]--as-sixel flag is currently not supported on Windows.[/]"
+        )
         sys.exit(1)
 
     print("\033[?1049h", end="")
