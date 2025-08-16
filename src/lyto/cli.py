@@ -249,7 +249,7 @@ def on_service_state_change(
 
 def main() -> int:
     if cli_args.as_sixel and os.name == "nt":
-        log.critical(
+        log.error(
             "[red bold]--as-sixel flag is currently not supported on Windows.[/]"
         )
         sys.exit(1)
