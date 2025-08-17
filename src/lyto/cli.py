@@ -1,16 +1,17 @@
+import _thread
 import argparse
+import importlib.metadata
 import io
 import logging
+import os
 import random
 import string
 import subprocess
+import sys
 import time
-import importlib.metadata
-import _thread
 from os import get_terminal_size
 
 import qrcode
-import sixel
 from rich.logging import RichHandler
 from zeroconf import IPVersion, ServiceBrowser, ServiceStateChange, Zeroconf
 
@@ -63,7 +64,7 @@ parser.add_argument("--debug", action="store_true", help="Enable debug logs.")
 parser.add_argument(
     "--as-sixel",
     action="store_true",
-    help="(EXPERIMENTAL) Use Sixel graphics.",
+    help="(EXPERIMENTAL) Use Sixel graphics. Currently not supported on Windows.",
 )
 parser.add_argument(
     "--only-connect",
@@ -118,6 +119,8 @@ def ascii_qr_code(text: str):
     qr.add_data(text)
 
     if cli_args.as_sixel:
+        import sixel
+
         log.debug("Outputting QR code as Sixel graphics")
         file = io.BytesIO()
 
@@ -245,6 +248,12 @@ def on_service_state_change(
 
 
 def main() -> int:
+    if cli_args.as_sixel and os.name == "nt":
+        log.error(
+            "[red bold]--as-sixel flag is currently not supported on Windows.[/]"
+        )
+        sys.exit(1)
+
     print("\033[?1049h", end="")
     print(ascii_qr_code(generate_code(NAME, PASSWORD)))
 
