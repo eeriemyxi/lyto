@@ -8,7 +8,7 @@ authors = [
 dependencies = [
     "zeroconf>=0.131.0",
     "rich>=13.7.1",
-    "sixel @ git+https://github.com/lubosz/python-sixel.git",
+    "sixel",
     "qrcode[pil]>=7.4.2",
 ]
 readme = "README.md"
