@@ -15,7 +15,18 @@ import qrcode
 from rich.logging import RichHandler
 from zeroconf import IPVersion, ServiceBrowser, ServiceStateChange, Zeroconf
 
+if os.name == "nt":
+    import ctypes
 
+    def enable_virtual_terminal():
+        kernel32 = ctypes.windll.kernel32
+        handle = kernel32.GetStdHandle(-11)  # STD_OUTPUT_HANDLE = -11
+        mode = ctypes.c_ulong()
+        kernel32.GetConsoleMode(handle, ctypes.byref(mode))
+        mode.value |= 0x0004  # ENABLE_VIRTUAL_TERMINAL_PROCESSING
+        kernel32.SetConsoleMode(handle, mode)
+
+    enable_virtual_terminal() # Function to enable ASCII escape sequences
 def get_code(n: int):
     return "".join(random.choices(string.ascii_letters, k=n))
 
